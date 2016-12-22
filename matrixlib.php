@@ -295,12 +295,12 @@ class MatrixConnector
     $query_data['msgtype'] = 'm.text';
     $query_data['body'] = $message;
 
-    $ch=curl_init();
     if ($roomId == false)
     {
       return false;
     }
 
+    $ch=curl_init();
     $url = $this->matrix_server . "_matrix/client/r0/rooms/" . $roomId . "/send/m.room.message?access_token=" . $this->access_token;
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, 1);
@@ -332,6 +332,7 @@ class MatrixConnector
         //This is a direct user
         //echo ('directRoom: ' . $room . "\n");
         $roomId = $this->lookupDirectRoom($room);
+
         if (!$roomId)
         {
           // invite the other User
@@ -360,7 +361,7 @@ class MatrixConnector
     //var_dump($event);    
   }
 
-  private function roomEventMessage( $room, $event)
+  private function roomEventMessage($room, $event)
   {
     var_dump($event);
   }
@@ -421,15 +422,17 @@ class MatrixConnector
 
 
     } else {
+      if ($type != 'default') {
+        
+        $sqlQuery = 'UPDATE rooms';
+        $sqlQuery = $sqlQuery . ' SET type = ' . '"' . $this->matrixDB->escapeString($type) . '"';
 
-      $sqlQuery = 'UPDATE rooms';
-      $sqlQuery = $sqlQuery . ' SET type = ' . '"' . $this->matrixDB->escapeString($type) . '"';
+        if (!$roomName ==  false) {
+          $sqlQuery = $sqlQuery . ', name = "' . $this->matrixDB->escapeString($roomName) . '"';
+        }
 
-      if (!$roomName ==  false) {
-        $sqlQuery = $sqlQuery . ', name = "' . $this->matrixDB->escapeString($roomName) . '"';
+        $sqlQuery = $sqlQuery . ' WHERE roomId = "' . $this->matrixDB->escapeString($room) . '";';
       }
-
-      $sqlQuery = $sqlQuery . ' WHERE roomId = "' . $this->matrixDB->escapeString($room) . '";';
     }
       $this->matrixDB->exec($sqlQuery);
   }
@@ -488,7 +491,7 @@ class MatrixConnector
     ');
 
     while ($roomId = $rooms->fetchArray(SQLITE3_ASSOC)) {
-      return $roomId['roomId'];
+      return $roomId['roomId']; 
     }
 
     return false;
@@ -505,5 +508,9 @@ class MatrixConnector
     }
 
     return false;
+  }
+
+  private function inviteUserForDirectChat($room) {
+    var_dump($room);
   }
 }
