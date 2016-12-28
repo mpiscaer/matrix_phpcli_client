@@ -28,7 +28,7 @@ class MatrixConnector
 
   private function initialEnvironment() 
   {
-    $this->matrixDB = new SQLite3('db/matrix.db');
+    $this->matrixDB = new SQLite3(dirname(__FILE__)  . '/db/matrix.db');
 
     $this->matrixDB->exec('
       CREATE TABLE IF NOT EXISTS properties
@@ -423,7 +423,7 @@ class MatrixConnector
 
     } else {
       if ($type != 'default') {
-        
+
         $sqlQuery = 'UPDATE rooms';
         $sqlQuery = $sqlQuery . ' SET type = ' . '"' . $this->matrixDB->escapeString($type) . '"';
 
